@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExplicaMatR</title>
+    <link rel="icon" href="https://toppng.com/uploads/preview/open-math-icon-11563164013hkrwcjujyy.png" sizes="192x192">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #2c2f33;
+            --panel-color: #383c42;
+            --input-bg: #4b5257;
+            --text-color: #e0e0e0;
+            --subtle-text: #a3a9b3;
+            --highlight-color: #ff7043;
+            --highlight-hover: #f4511e;
+            --danger-color: #e07b7b;
+            --danger-hover: #d86e6e;
+            --border-color: #565c63;
+            --shadow: rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, sans-serif;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            font-size: 1.1rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 2.2rem;
+            color: var(--highlight-color);
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .tab-button {
+            background: none;
+            border: 2px solid var(--border-color);
+            color: var(--subtle-text);
+            font-size: 1.2rem;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .tab-button.active,
+        .tab-button:hover,
+        .tab-button:focus {
+            background-color: var(--highlight-color);
+            color: white;
+            border-color: var(--highlight-color);
+            outline: none;
+        }
+
+        .tab-content {
+            background-color: var(--panel-color);
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 6px 12px var(--shadow);
+            display: none;
+        }
+
+        #alunos {
+            display: block;
+        }
+
+        h2, h3 {
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        input[type="text"],
+        input[type="month"],
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        select {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            padding: 14px;
+            font-size: 1.1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        button {
+            background-color: #4b4b4b;
+            color: var(--highlight-color);
+            padding: 14px 20px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #333333;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        li {
+            background-color: #383c42;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            gap: 10px;
+        }
+
+        li span {
+            flex-grow: 1;
+            font-size: 1.1rem;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        li .list-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        li button {
+            padding: 10px 14px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        li .list-actions .remove-item {
+            background-color: #4b4b4b;
+            color: white;
+        }
+
+        li .list-actions .remove-item:hover {
+            background-color: #333333;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                font-size: 1.2rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .tab-content {
+                padding: 18px;
+            }
+
+            input, select, button {
+                font-size: 1.2rem;
+            }
+
+            li {
+                font-size: 1.1rem;
+            }
+
+            li .list-actions {
+                flex-direction: row;
+                align-items: stretch;
+            }
+
+            li button {
+                font-size: 1rem;
+                padding: 8px 10px;
+                min-width: auto;
+            }
+        }
+
+        .add-aluno-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            align-items: center;
+        }
+
+        .add-aluno-container input[type="text"] {
+            flex-grow: 1;
+        }
+
+        .total-presenca {
+            background-color: var(--panel-color);
+            padding: 16px;
+            margin-top: 12px;
+            border-radius: 8px;
+            text-align: right;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .export-button-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .export-button-container button {
+            background-color: #4b4b4b;
+            color: var(--highlight-color);
+            padding: 10px 14px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .export-button-container button:hover {
+            background-color: #333333;
+        }
+
+        #filtroData {
+            margin-top: 15px;
+        }
+
+        .add-aluno-button {
+            background-color: #4b4b4b;
+            color: white;
+            padding: 10px 14px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .add-aluno-button:hover {
+            background-color: #333333;
+        }
+
+        .add-aluno-button span {
+            font-size: 1.5rem;
+            color: green;
+        }
+
+        .pagamento-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            background-color: #f44336; /* Por pagar por padrão */
+            transition: background-color 0.2s;
+        }
+
+        .pagamento-item.pago {
+            background-color: #4CAF50;
+        }
+
+        .pagamento-item .total-pago {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-left: 10px;
+        }
+
+        /* Estilos para o Pop-up */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+            padding-top: 60px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--panel-color);
+            margin: auto;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px var(--shadow);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-content h3 {
+            color: var(--highlight-color);
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .modal-content input[type="number"] {
+            margin-bottom: 15px;
+            padding: 12px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .modal-actions .confirm-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        .modal-actions .confirm-btn:hover {
+            background-color: #45a049;
+        }
+
+        .modal-actions .cancel-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+        }
+        .modal-actions .cancel-btn:hover {
+            background-color: #e04132;
+        }
+
+        .pagamento-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .pagamento-actions .check-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .pagamento-actions .check-button:hover {
+            background-color: #45a049;
+        }
+
+        .pagamento-actions .check-button.toggled {
+            background-color: #f44336; /* Red when not checked */
+        }
+    </style>
+</head>
+<body>
+    <h1>ExplicaMat<sup>R</sup></h1>
+    <div class="tabs">
+        <button class="tab-button active" data-tab="alunos"><i class="material-icons">school</i></button>
+        <button class="tab-button" data-tab="presencas"><i class="material-icons">assignment_turned_in</i></button>
+        <button class="tab-button" data-tab="registar_manual"><i class="material-icons">keyboard</i></button>
+        <button class="tab-button" data-tab="pagamentos"><i class="material-icons">attach_money</i></button>
+    </div>
+    <div id="alunos" class="tab-content">
+        <h2>Adicionar Aluno</h2>
+        <div class="add-aluno-container">
+            <input type="text" id="infoAlunoInput" placeholder="Dados do aluno">
+            <button id="adicionarAlunoBtn" class="add-aluno-button">
+                <span>+</span>
+            </button>
+        </div>
+        <h3>Lista de Alunos</h3>
+        <ul id="listaAlunos"></ul>
+    </div>
+    <div id="presencas" class="tab-content">
+        <h2>Presenças Registadas</h2>
+        <div class="export-button-container">
+            <button id="exportarPresencasBtn">Exportar para Excel</button>
+        </div>
+        <label for="filtroAluno">Filtrar por Aluno:</label>
+        <select id="filtroAlunoSelect">
+            <option value="">Todos</option>
+        </select>
+        <div id="filtroData">
+            <label>Filtrar por Mês/Ano:</label>
+            <input type="month" id="filtroDataInput">
+        </div>
+        <ul id="listaPresencas"></ul>
+    </div>
+    <div id="registar_manual" class="tab-content">
+        <h2>Registar Presença Manual</h2>
+        <label for="alunoManual">Aluno:</label>
+        <select id="alunoManualSelect">
+            <option value="">Selecione um aluno</option>
+        </select><br><br>
+        <label for="dataManual">Data:</label>
+        <input type="date" id="dataManualInput"><br><br>
+        <label for="horaManual">Hora (HH:MM):</label>
+        <input type="time" id="horaManualInput"><br><br>
+        <label for="duracaoManual">Duração (minutos):</label>
+        <input type="number" id="duracaoManualInput" min="1" value="60"><br><br>
+        <button id="adicionarPresencaManualBtn">Adicionar Registo Manual</button>
+    </div>
+    <div id="pagamentos" class="tab-content">
+        <h2>Registo de Pagamentos</h2>
+        <label for="filtroPagamentoAluno">Selecionar Aluno:</label>
+        <select id="filtroPagamentoAluno">
+            <option value="">-- Escolha um aluno --</option>
+        </select>
+        <ul id="listaPagamentos"></ul>
+    </div>
+
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <h3>Registar Pagamento</h3>
+            <p>Mês: <strong id="modalMes"></strong></p>
+            <p>Total Pago: <strong id="modalTotalPago">0.00€</strong></p>
+            <input type="number" id="valorPagamentoInput" placeholder="Valor a pagar (€)" step="0.01">
+            <div class="modal-actions">
+                <button class="confirm-btn" id="confirmPaymentBtn">Adicionar</button>
+                <button class="cancel-btn" id="cancelPaymentBtn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Cache de elementos do DOM
+    const alunosLista = document.getElementById('listaAlunos');
+    const presencasLista = document.getElementById('listaPresencas');
+    const filtroAlunoSelect = document.getElementById('filtroAlunoSelect');
+    const filtroDataInput = document.getElementById('filtroDataInput');
+    const infoAlunoInput = document.getElementById('infoAlunoInput');
+    const adicionarAlunoBtn = document.getElementById('adicionarAlunoBtn');
+    const tabsContainer = document.querySelector('.tabs');
+    const tabAlunos = document.getElementById('alunos');
+    const tabPresencas = document.getElementById('presencas');
+    const alunoManualSelect = document.getElementById('alunoManualSelect');
+    const dataManualInput = document.getElementById('dataManualInput');
+    const horaManualInput = document.getElementById('horaManualInput');
+    const duracaoManualInput = document.getElementById('duracaoManualInput');
+    const adicionarPresencaManualBtn = document.getElementById('adicionarPresencaManualBtn');
+    const exportarPresencasBtn = document.getElementById('exportarPresencasBtn');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const tabPagamentos = document.getElementById('pagamentos');
+    const filtroPagamentoAluno = document.getElementById('filtroPagamentoAluno');
+    const listaPagamentos = document.getElementById('listaPagamentos');
+
+    // Elementos do Modal de Pagamento
+    const paymentModal = document.getElementById('paymentModal');
+    const modalMes = document.getElementById('modalMes');
+    const modalTotalPago = document.getElementById('modalTotalPago');
+    const valorPagamentoInput = document.getElementById('valorPagamentoInput');
+    const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+    const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
+
+    let currentPaymentAlunoId = null;
+    let currentPaymentMesKey = null;
+
+    // Dados
+    let alunos = JSON.parse(localStorage.getItem('alunos')) || [];
+    // MODIFICAÇÃO 1: Ordenar alunos ao carregar, com tratamento numérico
+    if (alunos.length > 0) {
+        alunos.sort((a, b) => a.info.localeCompare(b.info, undefined, { numeric: true, sensitivity: 'base' }));
+    }
+    let presencas = JSON.parse(localStorage.getItem('presencas')) || [];
+    // Alteração na estrutura de pagamentos: agora armazena um objeto com 'total' e 'pago' (boolean)
+    let pagamentos = JSON.parse(localStorage.getItem('pagamentos')) || {};
+    // Exemplo: pagamentos = { "alunoId": { "YYYY-MM": { total: 150.00, pago: true }, ... } }
+
+    // Funções utilitárias
+    const salvarDados = () => {
+        localStorage.setItem('alunos', JSON.stringify(alunos));
+        localStorage.setItem('presencas', JSON.stringify(presencas));
+        localStorage.setItem('pagamentos', JSON.stringify(pagamentos));
+    };
+    const gerarId = () => '_' + Math.random().toString(36).substr(2, 9);
+
+    // Função para gerar o arquivo Excel (.xlsx)
+    function gerarExcelPresencas() {
+        if (presencas.length === 0) {
+            alert('Não há presenças para exportar.');
+            return;
+        }
+
+        const dadosExcel = [['Aluno', 'Data', 'Hora', 'Duração (minutos)']];
+        const colunas = ['Aluno', 'Data', 'Hora', 'Duração (minutos)'];
+
+        presencas.forEach(presenca => {
+            const aluno = alunos.find(a => a.id === presenca.alunoId);
+            if (aluno) {
+                const data = new Date(presenca.timestamp);
+                const dia = data.getDate().toString().padStart(2, '0');
+                const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+                const ano = data.getFullYear();
+                const hora = data.getHours().toString().padStart(2, '0');
+                const minutos = data.getMinutes().toString().padStart(2, '0');
+                const dataFormatada = `${dia}/${mes}/${ano}`;
+                const horaFormatada = `${hora}:${minutos}`;
+
+                dadosExcel.push([
+                    aluno.info,
+                    dataFormatada,
+                    horaFormatada,
+                    presenca.duracao || ''
+                ]);
+            }
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(dadosExcel);
+
+        const wscols = [];
+        for (let i = 0; i < colunas.length; i++) {
+            let max_len = colunas[i].length;
+            dadosExcel.forEach(row => {
+                const cellValue = row[i];
+                const cellLength = cellValue ? cellValue.toString().length : 0;
+                if (cellLength > max_len) {
+                    max_len = cellLength;
+                }
+            });
+            wscols.push({ wch: max_len + 2 });
+        }
+        ws['!cols'] = wscols;
+
+        ws['!autofilter'] = { ref: XLSX.utils.encode_range(XLSX.utils.decode_range('A1:' + String.fromCharCode(64 + colunas.length) + '1')) };
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Presenças");
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+        const blob = new Blob([wbout], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'ExplicaMatR.xlsx');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+    }
+
+    // Funções para manipular alunos
+    function adicionarNovoAluno() {
+        const infoAluno = infoAlunoInput.value.trim();
+        if (!infoAluno) {
+            alert('Preencha o nome, ano e escola!');
+            return;
+        }
+        const id = gerarId();
+        alunos.push({ id, info: infoAluno });
+        // MODIFICAÇÃO 2: Ordenar alunos após adicionar um novo, com tratamento numérico
+        alunos.sort((a, b) => a.info.localeCompare(b.info, undefined, { numeric: true, sensitivity: 'base' }));
+        salvarDados();
+        infoAlunoInput.value = '';
+        atualizarListaAlunos();
+        atualizarFiltroAlunos();
+        preencherAlunosManuais();
+        atualizarSelectPagamentos();
+    }
+    function removerAluno(id) {
+        if (!confirm("Tem a certeza que quer remover este aluno?")) return;
+        alunos = alunos.filter(a => a.id !== id);
+        // Remover pagamentos e presenças associadas a este aluno
+        delete pagamentos[id];
+        presencas = presencas.filter(p => p.alunoId !== id);
+
+        salvarDados();
+        atualizarListaAlunos();
+        atualizarFiltroAlunos();
+        preencherAlunosManuais();
+        atualizarSelectPagamentos();
+    }
+    function criarAlunoListItem(aluno) {
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        span.textContent = aluno.info;
+        const botoesDiv = document.createElement('div');
+        botoesDiv.className = 'list-actions';
+        const criarBotaoPresenca = (texto, duracao) => {
+            const btn = document.createElement('button');
+            btn.textContent = texto;
+            btn.title = `Registar presença de ${texto}`;
+            btn.addEventListener('click', () => registarPresenca(aluno.id, duracao));
+            return btn;
+        };
+        const btn1h = criarBotaoPresenca('1h', 60);
+        const btn1h30 = criarBotaoPresenca('1h30', 90);
+        const btn2h = criarBotaoPresenca('2h', 120);
+        const btnRemover = document.createElement('button');
+        btnRemover.textContent = '❌';
+        btnRemover.title = 'Remover aluno';
+        btnRemover.className = 'remove-item';
+        btnRemover.addEventListener('click', () => removerAluno(aluno.id));
+        botoesDiv.appendChild(btn1h);
+        botoesDiv.appendChild(btn1h30);
+        botoesDiv.appendChild(btn2h);
+        botoesDiv.appendChild(btnRemover);
+        li.appendChild(span);
+        li.appendChild(botoesDiv);
+        return li;
+    }
+    function atualizarListaAlunos() {
+        alunosLista.innerHTML = '';
+        alunos.forEach(aluno => {
+            alunosLista.appendChild(criarAlunoListItem(aluno));
+        });
+    }
+    function atualizarFiltroAlunos() {
+        filtroAlunoSelect.innerHTML = '<option value="">Todos</option>';
+        alunos.forEach(aluno => {
+            const option = document.createElement('option');
+            option.value = aluno.id;
+            option.textContent = aluno.info;
+            filtroAlunoSelect.appendChild(option);
+        });
+    }
+
+    // Funções para manipular presenças
+    function registarPresenca(alunoId, duracao) {
+        const data = new Date();
+        presencas.push({ alunoId, timestamp: data.toISOString(), duracao });
+        salvarDados();
+        mostrarPresencas();
+        alert('A presença foi registada!');
+    }
+    function removerPresenca(index) {
+        if (!confirm("Remover esta presença?")) return;
+        presencas.splice(index, 1);
+        salvarDados();
+        mostrarPresencas();
+    }
+    function mostrarPresencas() {
+        presencasLista.innerHTML = '';
+        const filtroAlunoId = filtroAlunoSelect.value;
+        const filtroMesAno = filtroDataInput.value;
+        let totalMinutos = 0;
+        let presencasFiltradas = [];
+        presencas.forEach((presenca) => {
+            const aluno = alunos.find(a => a.id === presenca.alunoId);
+            if (!aluno) return;
+            const dataPresenca = new Date(presenca.timestamp);
+            const mesAnoPresenca = dataPresenca.toISOString().slice(0, 7);
+            const alunoCorresponde = !filtroAlunoId || presenca.alunoId === filtroAlunoId;
+            const mesAnoCorresponde = !filtroMesAno || mesAnoPresenca === filtroMesAno;
+            if (alunoCorresponde && mesAnoCorresponde) {
+                presencasFiltradas.push(presenca);
+                if (presenca.duracao) {
+                    totalMinutos += presenca.duracao;
+                }
+            }
+        });
+
+        presencasFiltradas.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        presencasFiltradas.forEach((presenca) => {
+            const aluno = alunos.find(a => a.id === presenca.alunoId);
+            const data = new Date(presenca.timestamp);
+            const dia = data.getDate().toString().padStart(2, '0');
+            const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+            const hora = data.getHours().toString().padStart(2, '0');
+            const minutos = data.getMinutes().toString().padStart(2, '0');
+            const dataFormatada = `${dia}/${mes}`;
+            const horaFormatada = `${hora}h${minutos}`;
+            const duracaoTexto = presenca.duracao ? ` (${presenca.duracao} min)` : '';
+            const li = document.createElement('li');
+            li.innerHTML = `${aluno.info}<br>${dataFormatada} ${horaFormatada}${duracaoTexto}`;
+            const btnRemover = document.createElement('button');
+            btnRemover.textContent = '❌';
+            const originalIndex = presencas.findIndex(p => p.timestamp === presenca.timestamp && p.alunoId === presenca.alunoId);
+            btnRemover.addEventListener('click', () => removerPresenca(originalIndex));
+            li.appendChild(btnRemover);
+            presencasLista.appendChild(li);
+        });
+        if (filtroAlunoId && filtroMesAno) {
+            const totalHoras = Math.floor(totalMinutos / 60);
+            const minutosRestantes = totalMinutos % 60;
+            const mensagemTotal = `<li class="total-presenca"><strong>Total de Presença:</strong> ${totalHoras}h${minutosRestantes.toString().padStart(2, '0')} neste mês</li>`;
+            presencasLista.insertAdjacentHTML('beforeend', mensagemTotal);
+        }
+    }
+
+    function preencherAlunosManuais() {
+        alunoManualSelect.innerHTML = '<option value="">Selecione um aluno</option>';
+        alunos.forEach(aluno => {
+            const option = document.createElement('option');
+            option.value = aluno.id;
+            option.textContent = aluno.info;
+            alunoManualSelect.appendChild(option);
+        });
+    }
+
+    function registarPresencaManual() {
+        const alunoId = alunoManualSelect.value;
+        const dataManual = dataManualInput.value;
+        const horaManual = horaManualInput.value;
+        const duracao = parseInt(duracaoManualInput.value);
+        if (!alunoId) {
+            alert('Selecione um aluno.');
+            return;
+        }
+        if (!dataManual) {
+            alert('Selecione uma data.');
+            return;
+        }
+        if (!horaManual) {
+            alert('Selecione uma hora.');
+            return;
+        }
+        if (isNaN(duracao) || duracao <= 0) {
+            alert('A duração deve ser um número positivo.');
+            return;
+        }
+        const timestampManual = new Date(`${dataManual}T${horaManual}:00Z`).toISOString();
+        presencas.push({ alunoId, timestamp: timestampManual, duracao });
+        salvarDados();
+        mostrarPresencas();
+        alert('Registo manual adicionado com sucesso!');
+        alunoManualSelect.value = '';
+        dataManualInput.value = '';
+        horaManualInput.value = '';
+        duracaoManualInput.value = '60';
+    }
+    function openTab(tabId) {
+        tabContents.forEach(tabContent => {
+            tabContent.style.display = 'none';
+        });
+        tabButtons.forEach(tabButton => {
+            tabButton.classList.remove('active');
+        });
+        document.getElementById(tabId).style.display = 'block';
+        const activeTabButton = document.querySelector(`[data-tab="${tabId}"]`);
+        if (activeTabButton) {
+            activeTabButton.classList.add('active');
+        }
+
+        if (tabId === 'pagamentos') {
+            atualizarSelectPagamentos();
+            atualizarListaPagamentos();
+        }
+    }
+
+    function atualizarListaPagamentos() {
+        const alunoId = filtroPagamentoAluno.value;
+        listaPagamentos.innerHTML = '';
+        if (!alunoId) return;
+
+        const presencasAluno = presencas.filter(p => p.alunoId === alunoId);
+        const meses = {};
+
+        presencasAluno.forEach(p => {
+            const data = new Date(p.timestamp);
+            const key = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
+            if (!meses[key]) meses[key] = 0;
+            meses[key] += Number(p.duracao);
+        });
+
+        let mesesOrdenados = Object.keys(meses);
+        mesesOrdenados.sort((a, b) => {
+            // Ordenar do mais recente para o mais antigo
+            return new Date(b) - new Date(a);
+        });
+
+        for (const mesKey of mesesOrdenados) {
+            const totalMin = meses[mesKey];
+            const horas = Math.floor(totalMin / 60);
+            const minutos = totalMin % 60;
+            const textoPresenca = `${horas}h${minutos > 0 ? String(minutos).padStart(2,'0') + 'min' : ''}`;
+            const nomeMesAno = mesToNome(mesKey);
+
+            // Inicializar pagamentos para o mês se não existir
+            if (!pagamentos[alunoId]) pagamentos[alunoId] = {};
+            if (!pagamentos[alunoId][mesKey]) {
+                pagamentos[alunoId][mesKey] = { total: 0, pago: false };
+            }
+
+            const valorPago = pagamentos[alunoId][mesKey].total || 0;
+            const estaPago = pagamentos[alunoId][mesKey].pago;
+
+            const item = document.createElement('li');
+            item.className = `pagamento-item ${estaPago ? 'pago' : 'por-pagar'}`;
+            item.innerHTML = `
+                <div>
+                    ${nomeMesAno} (${textoPresenca})<br>
+                    <span class="total-pago">Pago: ${valorPago.toFixed(2)}€</span>
+                </div>
+                <div class="pagamento-actions">
+                    <button class="add-payment-button" data-aluno-id="${alunoId}" data-mes-key="${mesKey}">
+                        +€
+                    </button>
+                    <button class="check-button ${estaPago ? '' : 'toggled'}" data-aluno-id="${alunoId}" data-mes-key="${mesKey}">
+                        <i class="material-icons">${estaPago ? 'check' : 'close'}</i>
+                    </button>
+                </div>
+            `;
+            
+            // Event listener para abrir o modal de pagamento
+            item.querySelector('.add-payment-button').addEventListener('click', (e) => {
+                e.stopPropagation(); // Evita que o clique no botão ative o clique no item da lista
+                currentPaymentAlunoId = alunoId;
+                currentPaymentMesKey = mesKey;
+                
+                modalMes.textContent = nomeMesAno;
+                modalTotalPago.textContent = `${valorPago.toFixed(2)}€`;
+                valorPagamentoInput.value = '';
+                paymentModal.style.display = 'flex';
+            });
+
+            // Event listener para o botão de visto/x
+            item.querySelector('.check-button').addEventListener('click', (e) => {
+                e.stopPropagation(); // Evita que o clique no botão ative o clique no item da lista
+                if (!pagamentos[alunoId]) pagamentos[alunoId] = {};
+                if (!pagamentos[alunoId][mesKey]) {
+                    pagamentos[alunoId][mesKey] = { total: 0, pago: false };
+                }
+                pagamentos[alunoId][mesKey].pago = !pagamentos[alunoId][mesKey].pago;
+                salvarDados();
+                atualizarListaPagamentos();
+            });
+
+            listaPagamentos.appendChild(item);
+        }
+    }
+
+    function mesToNome(mes) {
+        const [ano, numero] = mes.split('-');
+        const nomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        return `${nomes[Number(numero) - 1]} de ${ano}`;
+    }
+
+    function atualizarSelectPagamentos() {
+        filtroPagamentoAluno.innerHTML = '<option value="">-- Escolha um aluno --</option>';
+        alunos.forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = a.id;
+            opt.textContent = a.info;
+            filtroPagamentoAluno.appendChild(opt);
+        });
+    }
+
+    // Event listeners do Modal
+    confirmPaymentBtn.addEventListener('click', () => {
+        const valor = parseFloat(valorPagamentoInput.value);
+        if (isNaN(valor) || valor <= 0) {
+            alert('Por favor, insira um valor válido e positivo.');
+            return;
+        }
+
+        if (currentPaymentAlunoId && currentPaymentMesKey) {
+            if (!pagamentos[currentPaymentAlunoId]) {
+                pagamentos[currentPaymentAlunoId] = {};
+            }
+            if (!pagamentos[currentPaymentAlunoId][currentPaymentMesKey]) {
+                pagamentos[currentPaymentAlunoId][currentPaymentMesKey] = { total: 0, pago: false };
+            }
+            pagamentos[currentPaymentAlunoId][currentPaymentMesKey].total = (pagamentos[currentPaymentAlunoId][currentPaymentMesKey].total || 0) + valor;
+            salvarDados();
+            atualizarListaPagamentos();
+            paymentModal.style.display = 'none';
+        }
+    });
+
+    cancelPaymentBtn.addEventListener('click', () => {
+        paymentModal.style.display = 'none';
+    });
+
+    // Fechar o modal ao clicar fora dele
+    window.addEventListener('click', (event) => {
+        if (event.target == paymentModal) {
+            paymentModal.style.display = "none";
+        }
+    });
+
+
+    filtroPagamentoAluno.addEventListener('change', atualizarListaPagamentos);
+
+    tabsContainer.addEventListener('click', (event) => {
+        let targetElement = event.target;
+            if (targetElement.tagName === 'I' && targetElement.parentNode.classList.contains('tab-button')) {
+                targetElement = targetElement.parentNode;
+            }
+        if (targetElement.tagName === 'BUTTON' && targetElement.dataset.tab) {
+            openTab(targetElement.dataset.tab);
+        }
+    });
+    adicionarAlunoBtn.addEventListener('click', adicionarNovoAluno);
+    exportarPresencasBtn.addEventListener('click', gerarExcelPresencas);
+    adicionarPresencaManualBtn.addEventListener('click', registarPresencaManual);
+    filtroAlunoSelect.addEventListener('change', mostrarPresencas);
+    filtroDataInput.addEventListener('change', mostrarPresencas);
+
+    window.onload = () => {
+        atualizarListaAlunos();
+        atualizarFiltroAlunos();
+        mostrarPresencas();
+        preencherAlunosManuais();
+        atualizarSelectPagamentos();
+        openTab('alunos');
+    };
+</script>
+</body>
+</html>
