@@ -1,7 +1,7 @@
 {
-  "name": "Lista de Compras",
-  "short_name": "Lista de Compras",
-  "description": "Lista de Compras",
+  "name": "ExplicaMatR",
+  "short_name": "ExplicaMatR",
+  "description": "ExplicaMatR",
   "start_url": "/ExplicaMatR/index.html",
   "scope": "/ExplicaMatR/",
   "display": "standalone",
