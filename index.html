@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ExplicaMatR</title>
-    <link rel="icon" href="https://toppng.com/uploads/preview/open-math-icon-11563164013hkrwcjujyy.png" sizes="192x192">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link rel="manifest" href="./manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="theme-color" content="#ff9800">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -958,6 +961,20 @@
         atualizarSelectPagamentos();
         openTab('alunos');
     };
+    
+// NOVO: Código para registar o Service Worker (PWA)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // ATENÇÃO: Corrigimos o caminho para incluir o nome do repositório
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(registration => {
+        console.log('ServiceWorker registado com sucesso:', registration);
+      })
+      .catch(error => {
+        console.log('Registo do ServiceWorker falhou:', error);
+      });
+  });
+}
 </script>
 </body>
 </html>
